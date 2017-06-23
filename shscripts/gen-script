@@ -1,0 +1,25 @@
+#!/bin/sh
+#Author: Sean Joseph
+#Version: 0.0.1
+#This script will do the few steps it takes to create 
+#an executable file with a shebang for whatever interpreter I give it.
+
+# gen-script <filename> <interpreter>
+
+# Features for next version:
+# Check if file exists and ask before clobbering
+# Check to see if interpreter exists on system
+
+echo "Checking for interpreter..."
+echo "Check finished!"
+
+echo "Checking for file..."
+echo "Check finished!"
+
+echo "Creating script with the $2 interpreter"
+echo "#!$2" > $1
+echo "Setting execute permission..."
+chmod +x $1
+echo "All done!"
+
+

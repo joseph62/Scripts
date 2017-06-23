@@ -1,0 +1,9 @@
+#!/bin/sh
+
+numberUsers=$(who | wc -l)
+userString="users are"
+if [ "$numberUsers" -eq "1" ]; then
+	userString="user is"
+fi
+
+echo "$numberUsers $userString currently logged in"

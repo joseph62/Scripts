@@ -1,0 +1,24 @@
+#! /bin/sh
+
+echo "Prompt: \c"
+echo "Some text entered as a prompt using <backslash>c"
+
+echo -n "Prompt: "
+echo "More text using -n\n"
+
+printf "Enter a password: "
+stty -echo
+read pass
+
+printf "\nEnter again: "
+read pass2
+stty echo
+
+printf "\n"
+
+########if  ("$pass" -eq "$pass2");then
+########	echo "Passwords match!"
+########else
+########	echo "Passwords do not match"
+########fi
+
