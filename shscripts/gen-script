@@ -10,16 +10,37 @@
 # Check if file exists and ask before clobbering
 # Check to see if interpreter exists on system
 
-echo "Checking for interpreter..."
-echo "Check finished!"
+usagestring="Usage gen-script <filename> <interpreter>"
 
-echo "Checking for file..."
-echo "Check finished!"
+if ! [ -f $2 ] || ! [ -x $2 ]
+then
+	echo "Interpreter provided is not usable"
+	echo "$usagestring"
+	exit 1
+fi
 
-echo "Creating script with the $2 interpreter"
-echo "#!$2" > $1
-echo "Setting execute permission..."
+if [ -e $1 ]
+then
+	echo "$1 already exists. Overwrite?(y/n) \c"
+	read answer
+	if [ "$answer" != "y" ] && [ "$answer" != "Y" ]
+	then
+		echo "File already exists"
+		echo "$usagestring"
+		exit 1
+	fi
+fi
+
+cat <<EOFILE > $1 
+#!$2
+###############################################################
+#Author:
+#Version:
+#Description:
+#
+#Usage:
+###############################################################
+
+EOFILE
+
 chmod +x $1
-echo "All done!"
-
-

@@ -1,0 +1,24 @@
+#!/bin/sh
+# Take entries and convert into a directory
+umask 077
+
+person="/tmp/pd.key.person.$$"
+office="/tmp/pd.key.office.$$"
+telephone="/tmp/pd.key.telephone.$$"
+user="/tmp/pd.key.user.$$"
+
+trap "exit 1" HUP INT PIPE QUIT TERM
+trap "rm -f $person $office $telephone $user" EXIT
+
+awk -F: '{ print $1 ":" $5 }' > $user
+sed -e 's=/.*= =' \
+	-e 's=^\([^:]*\):\(.*\) \([^ ]*\)=\1:\3, \2=' < $user | sort > $person
+
+sed -e 's=^\([^:]*\):[^/]*/\([^/]*\)/.*$=\1:\2=' < $user | sort > $office
+sed -e 's=^\([^:]*\):[^/]*/[^/]*/\([^/]*\)=\1:\2=' < $user | sort > $telephone
+
+join -t: $person $office |
+join -t: - $telephone |
+cut -d: -f 2- |
+sort -t: -k1,1 -k2,2 -k3,3 |
+awk -F: '{printf("%-39s\t%s\t%s\n", $1, $2, $3)}'

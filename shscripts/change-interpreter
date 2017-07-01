@@ -1,0 +1,41 @@
+#!/bin/sh
+###############################################################
+#Author: Sean Joseph
+#Version: 1.0.0
+#Description:
+#Change the interpreter shebang being used in 
+#the file given
+#Usage: change-interpreter <filename> <interpreter>
+###############################################################
+
+usageString="Usage: change-interpreter <filename> <interpreter>"
+
+if ! [ $1 ]
+then
+	echo "File not given"
+	echo "$usageString"
+	exit 1
+elif ! [ -e $1 ]
+then
+	echo "$1 does not exist"
+	echo "$usageString"
+	exit 1
+elif ! [ -f $1 ]
+then
+	echo "$1 is not a readable file"
+	echo "$usageString"
+	exit 1
+fi
+
+if ! [ $2 ] || ! [ -f $2 ] || ! [ -x $2 ]
+then
+	echo "Interpreter provided is not usable"
+	echo "$usageString"
+	exit 1
+fi
+
+tempfile=$(mktemp)
+echo "#!$2" > $tempfile
+cat $1 | grep -E -v -e "#!.*" >> $tempfile
+mv $tempfile $1
+chmod +x $1

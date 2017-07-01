@@ -1,0 +1,24 @@
+#!/bin/sh
+#Convert tab delimited tables into an html table
+
+cat << EOFILE
+<!DOCTYPE html>
+<html>
+<head>
+	<title> Office Directory </title>
+	<link rev="made" href="mailto:$user@`hostname`">
+</head>
+<body>
+	<table>
+EOFILE
+sed -e 's=&=\&amp;=g'\
+	-e 's=<=\&lt;=g'\
+	-e 's=>=\&gt;=g'\
+	-e 's=\t=</td><td>=g'\
+	-e 's=^.*$=	<tr><td>&</td></tr>='
+
+cat << EOFILE
+	</table>
+</body>
+</html>
+EOFILE
