@@ -1,41 +1,107 @@
 #!/bin/sh
 ###############################################################
 #Author: Sean Joseph
-#Version: 1.0.0
+#Version: 1.0.1
 #Description:
 #Change the interpreter shebang being used in 
-#the file given
-#Usage: change-interpreter <filename> <interpreter>
+#the file given.
+#
+# 1.0.1: Option processing introduced.
+#
 ###############################################################
+usage_string="Usage: change-interpreter -f <filename> -i <interpreter>"
 
-usageString="Usage: change-interpreter <filename> <interpreter>"
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" 1>&2
+}
 
-if ! [ $1 ]
-then
-	echo "File not given"
-	echo "$usageString"
+print_error_and_die ( )
+{
+	echo "Error: $1" 1>&2
+	print_usage
 	exit 1
-elif ! [ -e $1 ]
+}
+
+print_usage_and_rip ( )
+{
+	print_usage
+	exit 0
+}
+# </functions>
+
+# <arguments>
+target_file=
+new_interpreter=
+help_flag=false
+bad_arg_flag=false
+# </arguments>
+
+# <body>
+#Using getopts to process options for this script
+#the leading colon signifies manual error handling
+#a trailing colon after a letter signifies a flag
+#that requires an argument specified.
+# <getopts_template>
+while getopts :f:i:h opt
+do
+	case $opt in
+		f)	
+			target_file="$OPTARG"
+			;;
+		i)	
+			new_interpreter="$OPTARG"
+			;;
+		h)
+			help_flag=true
+			print_usage_and_rip
+			;;
+		'?')
+			bad_arg_flag=true
+			print_error_and_die "Error: Bad argument given"
+			;;
+	esac
+done
+
+shift $((OPTIND - 1)) #This removes all the options
+# </getopts_template>
+
+# <check_args>
+#Make sure the target file is usable
+if ! [ $target_file ]
 then
-	echo "$1 does not exist"
-	echo "$usageString"
-	exit 1
-elif ! [ -f $1 ]
+	print_error_and_die "Error: File not given"
+elif ! [ -e $target_file ]
 then
-	echo "$1 is not a readable file"
-	echo "$usageString"
-	exit 1
+	print_error_and_die "Error: $target_file does not exist" 
+elif ! [ -f $target_file ]
+then
+	print_error_and_die "Error: $target_file is not a readable file" 
 fi
 
-if ! [ $2 ] || ! [ -f $2 ] || ! [ -x $2 ]
+if ! [ $new_interpreter ] 
 then
-	echo "Interpreter provided is not usable"
-	echo "$usageString"
-	exit 1
+	print_error_and_die "Error: Interpreter not provided" 
+elif ! [ -f $new_interpreter ]
+then
+	print_error_and_die "Error: $new_interpreter not readable" 
+elif ! [ -x $new_interpreter ]
+then
+	Print_error_and_die "Error: $new_interpreter not executable"
 fi
+# </check_args>
 
-tempfile=$(mktemp)
-echo "#!$2" > $tempfile
-cat $1 | grep -E -v -e "#!.*" >> $tempfile
-mv $tempfile $1
-chmod +x $1
+# <action>
+
+temp_file=$(mktemp)
+echo "#!$new_interpreter" > $temp_file
+#grep away any shebangs in the give file and
+#concatenate that with the temp file created.
+cat $target_file | grep -E -v -e "#!.*" >> $temp_file
+mv $temp_file $target_file
+chmod +x $target_file
+
+# </action>
+
+# </body>

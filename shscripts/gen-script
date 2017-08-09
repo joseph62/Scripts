@@ -23,7 +23,7 @@ if [ -e $1 ]
 then
 	echo "$1 already exists. Overwrite?(y/n) \c"
 	read answer
-	if [ "$answer" != "y" ] && [ "$answer" != "Y" ]
+	if [ "x$answer" != "xy" ] && [ "x$answer" != "xY" ]
 	then
 		echo "File already exists"
 		echo "$usagestring"

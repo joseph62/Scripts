@@ -1,9 +1,11 @@
 #! /bin/sh
 #find a user on this system
 
-########if [ "$1" -eq "" ];then
-########	echo "Usage:\nfind-user <username>"
-########else
+if ! [ $1 ]
+then
+	echo "Usage: find-user <username>"
+	exit 1
+fi
 
 userlist=$(who | grep -F $1)
 echo $userlist
