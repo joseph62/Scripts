@@ -1,0 +1,129 @@
+#!/bin/sh
+#Author: Sean Joseph
+#Version: 1.0.1
+#This script will do the few steps it takes to create 
+#an executable file with a shebang for whatever interpreter I give it.
+
+# gen-script <filename> <interpreter>
+
+# Features for next version:
+# Check if file exists and ask before clobbering
+# Check to see if interpreter exists on system
+usage_string="Usage gen-script -f <filename> -i <interpreter> [-a <author>] [-v <version>] [-y] [-h]"
+
+# <arguments>
+target_file=
+interpreter=
+author=$USER
+version="0.0.1"
+force=false
+# </arguments>
+
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_usage_and_rip ( )
+{
+	print_usage
+	exit 0
+}
+
+print_prompt ( )
+{
+	echo "$1" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $1" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $1
+	print_usage
+	exit 1
+}
+# </functions>
+
+# <argument_processing>
+while getopts :f:i:a:v:h opts
+do
+	case $opts in
+		f)
+			target_file=$OPTARG
+			;;
+		i)
+			interpreter=$OPTARG
+			;;
+		a)
+			author=$OPTARG
+			;;
+		v)
+			version=$OPTARG
+			;;
+		h)
+			print_usage_and_rip
+			;;
+		y)
+			force=true
+			;;
+		'?')
+			print_error_and_die "bad argument found"
+			;;
+	esac
+done
+# </argument_processing>
+
+# <argument_validation>
+if ! [ -f $interpreter ] || ! [ -x $interpreter ]
+then
+	print_error_and_die "interpreter provided is not usable"
+fi
+
+if [ "$target_file" ]
+then
+	print_error_and_die "no target file specified"
+elif [ -e $target_file ] && ! [ $force ]
+then
+	print_prompt "$target_file already exists. Overwrite?(y/n) \c"
+	read answer
+	if [ "x$answer" != "xy" ] && [ "x$answer" != "xY" ]
+	then
+		print_error_and_die "file already exists"
+	fi
+fi
+# </argument_validation>
+
+# <body>
+cat <<EOFILE > "$target_file"
+#!$interpreter
+###############################################################
+#Author: $author
+#Version: $version
+#Description:
+#
+###############################################################
+usage_string=""
+
+# <arguments>
+# </arguments>
+
+# <functions>
+# </functions>
+
+# <argument_processing>
+# </argument_processing>
+
+# <argument_validation>
+# </argument_validation>
+
+# <body>
+# </body>
+EOFILE
+
+chmod +x "$target_file"
+# </body>
