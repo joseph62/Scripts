@@ -4,12 +4,15 @@
 #This script will do the few steps it takes to create 
 #an executable file with a shebang for whatever interpreter I give it.
 
-# gen-script <filename> <interpreter>
-
-# Features for next version:
-# Check if file exists and ask before clobbering
-# Check to see if interpreter exists on system
-usage_string="Usage gen-script -f <filename> -i <interpreter> [-a <author>] [-v <version>] [-y] [-h]"
+usage_string="
+Usage gen-script -f <filename> -i <interpreter> [-a <author>] [-v <version>] [-y] [-h]
+	-f : Specify file to generate
+	-i : Specify interpreter
+	-a : Specify author [optional]
+	-v : Specify version [optional]
+	-y : Specify force if file already exists [optional]
+	-h : Print out this message and exit [optional]
+"
 
 # <arguments>
 target_file=
@@ -33,42 +36,42 @@ print_usage_and_rip ( )
 
 print_prompt ( )
 {
-	echo "$1" >&2
+	echo "$@" >&2
 }
 
 print_error ( )
 {
-	echo "Error: $1" >&2
+	echo "Error: $@" >&2
 }
 
 print_error_and_die ( )
 {
-	print_error $1
+	print_error $@
 	print_usage
 	exit 1
 }
 # </functions>
 
 # <argument_processing>
-while getopts :f:i:a:v:h opts
+while getopts :f:F:i:I:a:A:v:V:hHyY opts
 do
 	case $opts in
-		f)
+		f | F)
 			target_file=$OPTARG
 			;;
-		i)
+		i | I)
 			interpreter=$OPTARG
 			;;
-		a)
+		a | A)
 			author=$OPTARG
 			;;
-		v)
+		v | V)
 			version=$OPTARG
 			;;
-		h)
+		h | H)
 			print_usage_and_rip
 			;;
-		y)
+		y | Y)
 			force=true
 			;;
 		'?')
@@ -84,10 +87,10 @@ then
 	print_error_and_die "interpreter provided is not usable"
 fi
 
-if [ "$target_file" ]
+if ! [ "$target_file" ]
 then
 	print_error_and_die "no target file specified"
-elif [ -e $target_file ] && ! [ $force ]
+elif [ -e $target_file ] && ! $force 
 then
 	print_prompt "$target_file already exists. Overwrite?(y/n) \c"
 	read answer
@@ -98,6 +101,15 @@ then
 fi
 # </argument_validation>
 
+# <debug>
+# <off/> echo "Target File: $target_file"
+# <off/> echo "Interpreter: $interpreter"
+# <off/> echo "Author: $author"
+# <off/> echo "Version: $version"
+# <off/> echo "Force: $force"
+# <off/> exit 0
+# </debug>
+
 # <body>
 cat <<EOFILE > "$target_file"
 #!$interpreter
@@ -107,7 +119,11 @@ cat <<EOFILE > "$target_file"
 #Description:
 #
 ###############################################################
-usage_string=""
+#usage_string="Usage: <command/> <command_args/> [-h]
+#	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
 
 # <arguments>
 # </arguments>

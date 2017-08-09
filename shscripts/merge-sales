@@ -1,0 +1,11 @@
+#!/bin/sh
+# Just an arbitrary example 
+# that shows how to use join
+
+# Combine quota and sales data
+
+sed '/^#/d' data-files/quotas | sort > quotas.sorted
+sed '/^#/d' data-files/sales | sort > sales.sorted
+
+join quotas.sorted sales.sorted
+rm quotas.sorted sales.sorted
