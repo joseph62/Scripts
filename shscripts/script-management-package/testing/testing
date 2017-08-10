@@ -1,0 +1,31 @@
+#!/bin/sh
+###############################################################
+#Author: sean
+#Version: 0.0.1
+#Description:
+#
+###############################################################
+#usage_string="Usage: <command/> <command_args/> [-h]
+#	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+# </arguments>
+
+# <debug>
+# <off/>
+# <off/># <functions>
+# <off/># </functions>
+# <off/>
+# </debug>
+
+# <argument_processing>
+# </argument_processing>
+
+# <argument_validation>
+# </argument_validation>
+
+# <body>
+# </body>

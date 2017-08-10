@@ -114,9 +114,9 @@ fi
 cat <<EOFILE > "$target_file"
 #!$interpreter
 ###############################################################
-#Author: $author
-#Version: $version
-#Description:
+# Author: $author
+# Version: $version
+# Description:
 #
 ###############################################################
 #usage_string="Usage: <command/> <command_args/> [-h]

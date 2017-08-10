@@ -1,0 +1,104 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+# Run through a given script and comment out any 
+# code that exists between <debug> tags
+###############################################################
+usage_string="Usage: debug-off -f <filename> [-h]
+	-f : The file name of the script to manipulate
+	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+target_file=
+# </arguments>
+
+# <functions>
+
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+
+print_usage_and_die ( )
+{
+	print_usage
+	exit 0
+}
+
+# </functions>
+
+# <argument_processing>
+while getopts :f:h opts
+do
+	case $opts in
+		f)
+			target_file=$OPTARG
+			;;
+		h)
+			print_usage_and_die
+			;;
+		'?')
+			print_error_and_die "bad argument given"
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+# </argument_processing>
+
+# <argument_validation>
+if ! [ $target_file ]
+then
+	print_error_and_die "File parameter not specified"
+elif ! [ -e $target_file ]
+then
+	print_error_and_die "$target_file does not exist"
+elif ! [ -f $target_file ]
+then
+	print_error_and_die "$target_file is not a readable file"
+fi
+# </argument_validation>
+
+# <body>
+new_temp_file=$(mktemp)
+in_debug_tags=false
+while read line
+do
+	case $line in
+		*\#*\</debug\>*)
+			in_debug_tags=false
+			echo "$line" >> $new_temp_file
+			;;
+		*\#*\<debug\>*)
+			in_debug_tags=true
+			echo "$line" >> $new_temp_file
+			;;
+		*)
+			if $in_debug_tags
+			then
+				echo "# <off/>$line" >> $new_temp_file
+			else
+				echo "$line" >> $new_temp_file
+			fi
+			;;
+	esac
+done < $target_file
+
+mv $new_temp_file $target_file
+# </body>
