@@ -1,0 +1,99 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+# Create a directory structure for the given class week
+###############################################################
+usage_string="Usage: init-class-directory -n <directory name> [-f] [-h]
+	-n : Specify the name of the directory to use
+	-f : force overwrite of a directory if it already exists
+	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+directory_name=""
+force=false
+subdirectories='project\nlab'
+files='lab/questions.txt'
+# </arguments>
+
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_usage_and_die ( )
+{
+	print_usage
+	exit 0
+}
+
+print_prompt ( )
+{
+	echo "$@" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+# </functions>
+
+# <argument_processing>
+while getopts :n:N:hHfF opts
+do
+	case $opts in
+		f | F)
+			force=true
+			;;
+		n | N)
+			directory_name=$OPTARG
+			;;
+		h | H)
+			print_usage_and_die
+			;;
+		'?')
+			print_error_and_die "bad argument found"
+			;;
+	esac
+done
+# </argument_processing>
+
+# <argument_validation>
+if ! [ "$directory_name" ]
+then
+	print_error_and_die "directory name not specified"
+elif [ -e $directory_name ] && !$force
+then
+	print_prompt "$target_file already exists. Overwrite?(y/n) \c"
+	read answer
+	if [ "x$answer" != "xy" ] && [ "x$answer" != "xY" ]
+	then
+		print_error_and_die "file already exists"
+	fi
+fi
+# </argument_validation>
+
+# <body>
+# Make directory structure
+mkdir $directory_name
+echo "$subdirectories" | while read -r subdirectory
+do
+	mkdir "$directory_name/$subdirectory"
+done
+echo "$files" | while read -r file
+do
+	touch "$directory_name/$file"
+done
+# </body>
