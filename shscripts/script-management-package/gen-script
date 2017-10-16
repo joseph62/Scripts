@@ -120,10 +120,10 @@ cat <<EOFILE > "$target_file"
 # Description:
 #
 ###############################################################
-#command="$target_file"
+#name="$target_file"
 #version="$version"
 #author="$author"
-#usage_string="Usage: \$command <command_args/> [-h]
+#usage_string="Usage: \$name <command_args/> [-h]
 #	-h : Print out this message and then exit [optional]"
 
 # <imports>
