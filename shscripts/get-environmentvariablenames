@@ -1,8 +1,8 @@
 #!/bin/sh
 ###############################################################
-#Author: sean
-#Version: 0.0.1
-#Description:
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
 #
 ###############################################################
 #usage_string="Usage: <command/> <command_args/> [-h]
@@ -14,12 +14,8 @@
 # <arguments>
 # </arguments>
 
-# <debug>
-# <off/>
-# <off/># <functions>
-# <off/># </functions>
-# <off/>
-# </debug>
+# <functions>
+# </functions>
 
 # <argument_processing>
 # </argument_processing>
@@ -28,4 +24,5 @@
 # </argument_validation>
 
 # <body>
+printenv | sed -e 's/=.*//'
 # </body>
