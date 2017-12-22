@@ -1,0 +1,108 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 1.0.0
+# Description:
+# Start an ssh tunnel to the specified server
+# specifiying local port and remote port
+###############################################################
+name="tunnel-db"
+version="1.0.0"
+author="Sean Joseph"
+usage_string="Usage: $name -d <server> -l <local port> -r <remote  port> [-h]
+	-d : The DB server to attempt tunneling with
+	-l : The local port to forward
+	-r : The remote port to forward
+	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+remote_port=
+local_port=
+tunnel_server=
+username="joseph62"
+target_server="mandark"
+domain="egr.msu.edu"
+# </arguments>
+
+# <functions>
+
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+
+print_usage_and_die ( )
+{
+	print_usage
+	exit 0
+}
+
+
+# </functions>
+
+# <argument_processing>
+while getopts :r:R:l:L:d:D:hH opts
+do
+	case $opts in
+		r | R)
+			remote_port=$OPTARG
+			;;
+		l | L)
+			local_port=$OPTARG
+			;;
+		d | D)
+			tunnel_server=$OPTARG
+			;;
+		h | H)
+			print_usage_and_die
+			;;
+		'?')
+			print_error_and_die "Bad argument!"
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+# </argument_processing>
+
+# <argument_validation>
+if ! [ $remote_port ] 
+then
+	print_error_and_die "Remote port not specified!"
+fi
+if ! [ $local_port ] 
+then
+	print_error_and_die "Local port not specified!"
+fi
+if ! [ $tunnel_server ] 
+then
+	print_error_and_die "Target server not specified!"
+fi
+# </argument_validation>
+
+# <body>
+echo "Remote Port: $remote_port"
+echo "Local Port: $local_port"
+echo "Server: $tunnel_server"
+echo "Command: ssh -f $username@$target_server.$domain -L $local_port:$tunnel_server.$domain:$remote_port -N"
+
+# -f the account/server to authenticate to
+# -L the port forwarding data
+# -N background immediately
+ssh -f $username@$target_server.$domain -L $local_port:$tunnel_server.$domain:$remote_port -N
+
+# </body>

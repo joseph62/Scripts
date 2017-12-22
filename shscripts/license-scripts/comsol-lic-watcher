@@ -1,0 +1,77 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+#
+###############################################################
+usage_string="Usage: comsol-lic-watcher -e <email> [-h]
+	-e : Email to receive notification
+	-h : Print out this message and then exit [optional]"
+
+# <arguments>
+email=
+comsol_license="aa_r"
+comsol_license_limit="25"
+# </arguments>
+
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_usage_and_rip ( )
+{
+	print_usage
+	exit 0
+}
+
+print_prompt ( )
+{
+	echo "$@" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+# </functions>
+
+# <argument_processing>
+while getopts :e:E:hH opts
+do
+	case $opts in 
+		e | E)
+			email=$OPTARG
+			;;
+		'?')
+			print_error_and_die "Bad argument!"
+			;;
+	esac
+done
+# </argument_processing>
+
+# <argument_validation>
+if [ -z $email ]
+then
+	print_error_and_die "Email not specified!"
+fi
+# </argument_validation>
+
+# <body>
+if  lic-check -l "$comsol_license" -t "$comsol_license_limit" 
+then
+	cat <<-EOF |  mail -s "License Usage Alert!" "$email"
+	Alert:
+	>>> The $comsol_license license has all $comsol_license_limit licenses in use! <<<
+	EOF
+fi 
+# </body>
