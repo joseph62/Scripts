@@ -1,0 +1,119 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 1.1.0
+# Description:
+# Forward TCP traffic from local port to remote port
+# on a target server through the connection server.
+###############################################################
+name="tunnel-connection"
+version="1.1.0"
+author="Sean Joseph"
+usage_string="Usage: $name -t <target server> -c <connection server> -u <username> -d <domain> -l <local port> -r <remote port> [-v] [-h]
+	-l : The local port to forward
+	-r : The remote port to forward
+	-t : The target server the traffic is tunneled to.
+	-c : The server that establishes the ssh connection.
+	-d : Specifiy the domain.
+	-u : Username to establish a connection with.
+	-v : Print verbose output [optional]
+	-h : Print out this message and then exit [optional]"
+
+# <imports>
+. ./error_usage_functions.sh
+# </imports>
+
+# <arguments>
+remote_port=
+local_port=
+target_server=
+username=
+connection_server=
+domain=
+verbose=
+# </arguments>
+
+# <functions>
+# </functions>
+
+# <argument_processing>
+while getopts :t:T:r:c:C:u:U:R:l:L:d:D:vVhH opts
+do
+	case $opts in
+		r | R)
+			remote_port=$OPTARG
+			;;
+		l | L)
+			local_port=$OPTARG
+			;;
+		t | T)
+			target_server=$OPTARG
+			;;
+		c | C)
+			connection_server=$OPTARG
+			;;
+		u | U)
+			username=$OPTARG
+			;;
+		d | D)
+			domain=$OPTARG
+			;;
+		h | H)
+			print_usage_and_die
+			;;
+		v | V)
+			verbose=true
+			;;
+		'?')
+			print_error_and_die "Bad argument!"
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+# </argument_processing>
+
+# <argument_validation>
+if ! [ $remote_port ] 
+then
+	print_error_and_die "Remote port not specified!"
+fi
+if ! [ $local_port ] 
+then
+	print_error_and_die "Local port not specified!"
+fi
+if ! [ $target_server ] 
+then
+	print_error_and_die "Target server not specified!"
+fi
+if ! [ $domain ]
+then
+	print_error_and_die "No domain specified!"
+fi
+if ! [ $username ]
+then
+	print_error_and_die "No username specified!"
+fi
+if ! [ $connection_server ]
+then
+	print_error_and_die "No connection server specified!"
+fi
+# </argument_validation>
+
+# <body>
+if [ $verbose ]
+then
+	echo "User: $username"
+	echo "Connection Server: $connection_server"
+	echo "Target Server: $target_server"
+	echo "Remote Port: $remote_port"
+	echo "Local Port: $local_port"
+	echo "Domain: $domain"
+	echo "Command: ssh -f $username@$connection_server.$domain -L $local_port:$target_server.$domain:$remote_port -N"
+fi
+
+# -f the account/server to authenticate to
+# -L the port forwarding data
+# -N background immediately
+ssh -f $username@$connection_server.$domain -L $local_port:$target_server.$domain:$remote_port -N
+
+# </body>

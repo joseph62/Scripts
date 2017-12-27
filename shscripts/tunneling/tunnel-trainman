@@ -3,7 +3,7 @@
 # Author: Sean Joseph
 # Version: 1.0.0
 # Description:
-# Run tunnel-db to forward db port for trainman
+#
 ###############################################################
 name="tunnel-trainman"
 version="1.0.0"
@@ -64,5 +64,5 @@ shift $((OPTIND - 1))
 # </argument_validation>
 
 # <body>
-tunnel-db -d trainman -r 5432 -l 5843
+tunnel-connection -c mandark -d egr.msu.edu -u joseph62 -t trainman -r 5432 -l 5843
 # </body>

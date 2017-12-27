@@ -64,5 +64,5 @@ shift $((OPTIND - 1))
 # </argument_validation>
 
 # <body>
-tunnel-db -d mandark -r 5432 -l 5842
+tunnel-connection -c mandark -d egr.msu.edu -u joseph62 -t mandark -r 5432 -l 5842
 # </body>
