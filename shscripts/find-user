@@ -1,13 +1,18 @@
 #! /bin/sh
 #find a user on this system
 
-if ! [ $1 ]
+if ! [ "$1" ]
 then
 	echo "Usage: find-user <username>"
 	exit 1
 fi
 
 userlist=$(who | grep -F $1)
-echo $userlist
+if ! [ "$userlist" ]
+then
+	echo "User '$1' not found!"
+else
+	echo $userlist
+fi
 ########fi
 

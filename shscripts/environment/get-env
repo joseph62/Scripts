@@ -1,0 +1,78 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 1.0.0
+# Description:
+# print out environment variables with values
+# in a formatted table
+###############################################################
+name="get-env"
+version="1.0.0"
+author="Sean Joseph"
+usage_string="Usage: $name [-s] [-h]
+	-s : Do not print out a header with the data [optional]
+	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+header="%-50s%-50s\n"
+line_break="==============================================================================================\n"
+print_header=true
+# </arguments>
+
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+
+print_usage_and_die ( )
+{
+	print_usage
+	exit 0
+}
+# </functions>
+
+# <argument_processing>
+while getopts :sShH opts
+do
+	case $opts in
+		h | H)
+			print_usage_and_die
+			;;
+		s | S)
+			print_header=
+			;;
+		'?')
+			print_error_and_die "Bad argument!"
+			;;
+	esac
+done
+shift $((OPTIND - 1))
+# </argument_processing>
+
+# <argument_validation>
+# </argument_validation>
+
+# <body>
+if [ $print_header ] 
+then
+	printf "$header" "Name" "Value"
+	printf "$line_break"
+fi
+printenv | awk -F= "{printf(\"$header\",\$1,\$2);}"
+# </body>

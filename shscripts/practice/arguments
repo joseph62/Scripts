@@ -1,0 +1,95 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+#
+###############################################################
+#name="arguments"
+#version="0.0.1"
+#author="Sean Joseph"
+#usage_string="Usage: $name <command_args/> [-h]
+#	-h : Print out this message and then exit [optional]"
+
+# <imports>
+# </imports>
+
+# <arguments>
+# </arguments>
+
+# <functions>
+#
+#print_usage ( )
+#{
+#	echo "$usage_string" >&2
+#}
+#
+#print_error ( )
+#{
+#	echo "Error: $@" >&2
+#}
+#
+#print_error_and_die ( )
+#{
+#	print_error $@
+#	print_usage
+#	exit 1
+#}
+#
+#print_usage_and_die ( )
+#{
+#	print_usage
+#	exit 0
+#}
+#
+#
+# </functions>
+
+# <argument_processing>
+#while getopts :hH opts
+#do
+#	case $opts in
+#		 h | H)
+#			print_usage_and_die
+#			;;
+#		'?')
+#			print_error_and_die "Bad argument!"
+#			;;
+#	esac
+#done
+#shift $((OPTIND - 1))
+# </argument_processing>
+
+# <argument_validation>
+# </argument_validation>
+
+# <body>
+
+echo "\$IFS = $IFS"
+echo "\$# gives the number of arguments: $#"
+echo "\$* gives all arguments as a string seperated by \$IFS: $*"
+echo "\$@ gives all arguments as separate strings: $@"
+echo
+
+echo "Iterating over arguments in a for loop with \$@."
+for arg in $@
+do echo "\$arg is $arg"
+done
+echo
+
+echo "Iterating over arguments in a for loop with \$*."
+echo "This method does not preserved an argument with IFS in it!"
+for arg in $*
+do echo "\$arg is $arg"
+done
+echo
+
+echo "Shift removes the first argument from the list"
+shift
+echo "\$#: $#"
+for arg in $@
+do echo "\$arg is $arg"
+done
+echo
+
+# </body>
