@@ -1,0 +1,89 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+# Run the lmutil command to check for usage
+# of the given license
+###############################################################
+usage_string="Usage: lic-check -l <license name> -t <total> [-h]
+	-l : Name of the license
+	-t : Total number of licenses of the given kind
+	-h : Print out this message and then exit [optional]"
+
+
+# <arguments>
+license=
+total=
+# </arguments>
+
+# <functions>
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_usage_and_rip ( )
+{
+	print_usage
+	exit 0
+}
+
+print_prompt ( )
+{
+	echo "$@" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+# </functions>
+
+# <argument_processing>
+while getopts :t:T:l:L:hH opts
+do
+	case $opts in
+		t | T)
+			total=$OPTARG
+			;;
+		l | L)
+			license=$OPTARG
+			;;
+		h | H)
+			print_usage_and_rip
+			;;
+		'?')
+			print_error_and_die "bad argument found"
+			;;
+	esac
+done
+# </argument_processing>
+
+# <argument_validation>
+if [ -z "$license" ]
+then
+	print_error_and_die "License not specified!"
+fi
+if [ -z "$total" ]
+then
+	print_error_and_die "Total number of licenses not specified!"
+fi
+# </argument_validation>
+
+# <body>
+lmutil lmstat -c 22126@lms1 -a | grep -E "Users of $license:.+$total.+$total.*"  > /dev/null
+
+if [ $? -eq 0 ]
+then
+	exit 0
+fi
+exit 1
+# </body>

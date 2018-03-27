@@ -1,0 +1,68 @@
+#!/bin/sh
+###############################################################
+# Author: Sean Joseph
+# Version: 0.0.1
+# Description:
+#
+###############################################################
+name="lic-check-many"
+version="0.0.1"
+author="Sean Joseph"
+usage_string="Usage: $name <space separated list of licenses> [-h]
+	-h : Print out this message and then exit [optional]"
+
+# <functions>
+
+print_usage ( )
+{
+	echo "$usage_string" >&2
+}
+
+print_error ( )
+{
+	echo "Error: $@" >&2
+}
+
+print_error_and_die ( )
+{
+	print_error $@
+	print_usage
+	exit 1
+}
+
+print_usage_and_die ( )
+{
+	print_usage
+	exit 0
+}
+
+
+# </functions>
+
+#<argument_processing>
+while getopts :hH opts
+do
+	case $opts in
+		 h | H)
+			print_usage_and_die
+			;;
+		'?')
+			print_error_and_die "Bad argument!"
+			;;
+	esac
+done
+# </argument_processing>
+
+# <argument_validation>
+if [ $# -eq 1 ]
+then
+	print_usage_and_die
+fi
+# </argument_validation>
+
+# <body>
+for license in $@
+do
+	lic-line -l "$license"
+done
+# </body>
