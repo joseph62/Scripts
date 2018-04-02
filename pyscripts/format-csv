@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+import sys, argparse
+
+# Get argument
+def get_arguments():
+    argparser = argparse.ArgumentParser(
+            description="Expand CSV data into columns.")
+    argparser.add_argument("-w","--width",help="Width of columns",
+                            type=int,default=15) 
+    argparser.add_argument("-f","--file",help="Input file")
+    argparser.add_argument("-c","--column-separator", dest="column",
+                            help="Column separator", default=",")
+    argparser.add_argument("-l","--line-separator", dest="line",
+                            help="Line separator", default="\n")
+    return argparser.parse_args()
+
+def get_input(source):
+    instr = ""
+    if source is not None:
+      with open(source) as handle:
+        instr = handle.read()
+    else:
+      instr = sys.stdin.read()
+    return instr
+
+if __name__ == "__main__":
+    args = get_arguments()
+    input_ = get_input(args.file)
+    # Read input
+    # expand elements on line with width
+    for line in input_.split(args.line):
+      outstr = ""
+      for elem in line.split(args.column):
+        # FEELSGOODMAN
+        outstr += "{{:<{}}}".format(args.width).format(elem)
+      # output
+      print(outstr)
