@@ -58,14 +58,17 @@ def get_backup_tickets(share):
     tickets = directories_to_tickets(directories)
     return tickets
 
+
 def get_output(response):
     result = ["id,time,status"]
-    for key,ticket in response.items():
-        if key.isdigit():
-            time = ticket["a_duration"]
-            id_ = ticket["id"]
-            status = ticket["a_statustitle"]
-            result.append("{},{},{}".format(id_, time, status))
+    tickets = [ticket for key,ticket in response.items() if key.isdigit()]
+    tickets.sort(key=(lambda x: x["id"]))
+    for ticket in tickets:
+        time = ticket["a_duration"]
+        id_ = ticket["id"]
+        status = ticket["a_statustitle"]
+        result.append("{},{},{}".format(id_, time, status))
+
     return result
 
 if __name__ == '__main__':
