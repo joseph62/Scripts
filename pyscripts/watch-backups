@@ -8,7 +8,6 @@ import os
 import getpass
 import tempfile
 import subprocess
-from pprint import pprint
 
 CONFIG = {
         "PARAMS" : [
@@ -19,7 +18,6 @@ CONFIG = {
             ],
         "URL" : "https://www.egr.msu.edu/decs/helpdesk/admin/api.php",
         "SHARE" : "/media/reinstallbackups",
-        "DOMAIN" : "egr",
         }
 
 def make_dict_get_params(params):
@@ -27,23 +25,6 @@ def make_dict_get_params(params):
     for key,value in params:
         result += "{}={}&".format(urllib.parse.quote(key),urllib.parse.quote(value))
     return result.rstrip("&")
-
-def mount_share(share,domain):
-    temp_dir = tempfile.mkdtemp()
-    username = input("Domain Account Username: ")
-    password = getpass.getpass("Domain Account Password: ")
-    options = "vers=3.0,domain={},username={},password={}".format(
-            domain,username,password) 
-    #prefix = domain + "\\"
-    #if not username.startswith(prefix):
-    #    username = prefix + username
-    cmd = ["mount","-t", "cifs", share, temp_dir,"-o",options]
-    subprocess.run(cmd)
-    return temp_dir 
-
-def unmount_share(mount_point):
-    cmd = ["umount", mount_point]
-    subprocess.run(cmd)
 
 def directories_to_tickets(directories):
     tickets = set()
@@ -54,6 +35,7 @@ def directories_to_tickets(directories):
             tickets.add(match.group())
     assert len(tickets) > 0, "There are no ticket directories in filer!"
     avg_length = (sum ([ len(ticket) for ticket in tickets ])) / len(tickets)
+
     tickets = {ticket for ticket in tickets
                 if (len(ticket) > (avg_length/2) and 
                     len(ticket) < (avg_length*2)
@@ -61,28 +43,36 @@ def directories_to_tickets(directories):
                 }
     return tickets
 
-if __name__ == '__main__':
-    query_url = (CONFIG["URL"] + make_dict_get_params(CONFIG["PARAMS"]))
-    domain = CONFIG["DOMAIN"]
-    share = CONFIG["SHARE"]
-    tickets = set()
-    #mount_point = None
-    assert os.path.exists(share), "Path '{}' does not exist!".format(share)
-    try:
-        #mount_point = mount_share(share,domain)
-        directories = os.listdir(share)
-        tickets = directories_to_tickets(directories)
-        query_url += "&ids=" + urllib.parse.quote(",".join(tickets))
-    except:
-        print("Something horrible has happened!")
+def query_helpdesk(query_url):
     raw_json = ""
     with urllib.request.urlopen(query_url) as handle:
         raw_json = handle.read().decode('utf-8')
     obj_json = json.loads(raw_json)
-    print("id,time,status")
-    for key,ticket in obj_json.items():
+    assert obj_json["result_code"] == 1, ("Helpdesk query failed! Result Message: {}"
+                                            .format(obj_json["result_message"]))
+    return obj_json
+
+def get_backup_tickets(share):
+    assert os.path.exists(share), "Path '{}' does not exist!".format(share)
+    directories = os.listdir(share)
+    tickets = directories_to_tickets(directories)
+    return tickets
+
+def get_output(response):
+    result = ["id,time,status"]
+    for key,ticket in response.items():
         if key.isdigit():
             time = ticket["a_duration"]
             id_ = ticket["id"]
             status = ticket["a_statustitle"]
-            print("{},{},{}".format(id_, time, status))
+            result.append("{},{},{}".format(id_, time, status))
+    return result
+
+if __name__ == '__main__':
+    query_url = (CONFIG["URL"] + make_dict_get_params(CONFIG["PARAMS"]))
+    share = CONFIG["SHARE"]
+    tickets = get_backup_tickets(share)
+    #mount_point = None
+    query_url += "&ids=" + urllib.parse.quote(",".join(tickets))
+    obj_json = query_helpdesk(query_url)
+    print("\n".join(get_output(obj_json)))
