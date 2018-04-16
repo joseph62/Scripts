@@ -3,7 +3,10 @@
 import argparse,sys
 
 def get_arguments():
-    parser = argparse.ArgumentParser(description="Take text through stdin and print sarcastified text to stdout.")
+    parser = argparse.ArgumentParser(description="Take text, sarcastify it, and output it to stdout.")
+    text_group = parser.add_mutually_exclusive_group(required=True)
+    text_group.add_argument("-t","--text",help="Specified text to sarcastify")
+    text_group.add_argument("--stdin",help="Text should be read from stdin",action="store_true")
     return parser.parse_args()
 
 def sarcastify(text):
@@ -17,6 +20,6 @@ def sarcastify(text):
 
 if __name__ == "__main__":
     args = get_arguments()
-    text = sys.stdin.read().rstrip()
+    text = args.text if not args.stdin else sys.stdin.read().rstrip()
     print(sarcastify(text))
 
