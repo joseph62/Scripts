@@ -1,0 +1,28 @@
+#! /usr/bin/env python3
+
+import os, argparse 
+
+def get_arguments():
+    parser = argparse.ArgumentParser(description="Mark some number of directories in a given directory for deletion with a provided date.")
+    parser.add_argument("--date",help="Date to stamp directories with.",required=True)
+    parser.add_argument("-n","--number",help="The number of directories to mark. Default is half the directories.",type=int)
+    parser.add_argument("--directory",help="The directory to work from.",default=os.getcwd())
+    return parser.parse_args()
+
+def get_child_directories(parent):
+    result = os.listdir(args.directory)
+    result = map(lambda x: os.path.join(args.directory,x), result)
+    result = filter(lambda x: os.path.isdir(x), result)
+    return sorted(result) 
+
+def take(amount,iterable):
+    return list(map(lambda x: x[1],zip(range(amount),iterable)))
+
+if __name__ == "__main__":
+    args = get_arguments()
+    directories = get_child_directories(args.directory)
+    num = len(directories)//2 if args.number is None else args.number
+    directories = take(num,directories)
+    for directory in directories:
+        new_directory = "{} (delete {})".format(directory,args.date)
+        os.rename(directory,new_directory)
