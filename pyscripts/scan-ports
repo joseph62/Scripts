@@ -6,7 +6,7 @@ from functools import partial
 def get_arguments():
     parser = argparse.ArgumentParser(description="Scan ports for a given host in a given range")
     parser.add_argument("-t","--target",help="The address of the machine to scan",required=True)
-    parser.add_argument("-v","--verbose",help="Output failures as well as successes",action="store_true")
+    parser.add_argument("-v","--verbose",help="Specify level of verbosity. Can be specified multiple times.",default=0,action="count")
     port_group = parser.add_mutually_exclusive_group(required=True)
     port_group.add_argument("-r","--range",help="The port range to scan",nargs=2,type=int,metavar=('START','END'))
     port_group.add_argument("-p","--port",help="The port to scan",type=int)
@@ -24,21 +24,26 @@ def scan_ports(target,range_):
     scan_target = partial(scan_port,target)
     for port in range_:
         if scan_target(port):
-            yield (True,"Port {} is open for tcp traffic".format(port))
+            yield (True,port)
         else:
-            yield (False,"Port {} is closed to tcp traffic".format(port))
+            yield (False,port)
 
 if __name__ == '__main__':
     args = get_arguments()
 
-    start, end = args.range if args.port is None else (args.port,args.port+1)
+    start, end = args.range if args.port is None else (args.port,args.port)
     end += 1
-    assert start >= 0 and start <= 65535, "Start must be in range 0-65535"
+    assert start >= 0 and start <= 65536, "Start must be in range 0-65535"
     assert end >= 0 and end <= 65536, "End must be in range 0-65535"
     assert start <= end, "Range start must be smaller than end!"
 
-    for success,message in scan_ports(args.target, range(start,end)):
-        if success or (not success and args.verbose):
-            print(message)
+    for success,port in scan_ports(args.target, range(start,end)):
+        if success:
+            if args.verbose > 0:
+                print("Port {} is open for tcp traffic".format(port))
+            else:
+                print("{}".format(port))
+        elif not success and args.verbose > 1:
+            print("Port {} is closed for tcp traffic".format(port))
 
 
