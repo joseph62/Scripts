@@ -7,6 +7,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description="Scan ports for a given host in a given range")
     parser.add_argument("-t","--target",help="The address of the machine to scan",required=True)
     parser.add_argument("-v","--verbose",help="Specify level of verbosity. Can be specified multiple times.",default=0,action="count")
+    parser.add_argument("--timeout",help="Set the timeout per request in seconds",default=0.3,type=float)
     port_group = parser.add_mutually_exclusive_group(required=True)
     port_group.add_argument("-r","--range",help="The port range to scan",nargs=2,type=int,metavar=('START','END'))
     port_group.add_argument("-p","--port",help="The port to scan",type=int)
@@ -17,7 +18,9 @@ def scan_port(target,port):
     try:
         s.connect((target,port))
         return True
-    except:
+    except ConnectionRefusedError as e:
+        return False
+    except socket.timeout as e:
         return False
 
 def scan_ports(target,range_):
@@ -30,7 +33,7 @@ def scan_ports(target,range_):
 
 if __name__ == '__main__':
     args = get_arguments()
-
+    socket.setdefaulttimeout(args.timeout)
     start, end = args.range if args.port is None else (args.port,args.port)
     end += 1
     assert start >= 0 and start <= 65536, "Start must be in range 0-65535"
