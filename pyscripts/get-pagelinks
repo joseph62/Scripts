@@ -1,0 +1,27 @@
+#! /usr/bin/env python3
+
+from argparse import ArgumentParser
+from urllib.request import urlopen
+from re import findall
+from operator import itemgetter
+
+def get_arguments():
+    parser = ArgumentParser(description="Get the linked resources for a given url.")
+    parser.add_argument("url",help="The url to scan")
+    return parser.parse_args()
+
+def get_html(url):
+    with urlopen(url) as handle:
+        text = handle.read().decode()
+    return text
+
+def get_links(html):
+    return map(itemgetter(1),findall('(href|src)="(([^"]|\\\\")+)"',html))
+
+def main(args):
+    html = get_html(args.url)
+    links = get_links(html)
+    print(*links,sep="\n")
+
+if __name__ == "__main__":
+    main(get_arguments())

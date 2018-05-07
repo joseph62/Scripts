@@ -1,0 +1,27 @@
+#! /usr/bin/env python3
+
+from argparse import ArgumentParser
+from urllib.request import urlopen
+
+def get_arguments():
+    parser = ArgumentParser(description="Get the title tag text for the given site.")
+    parser.add_argument("url",help="The url to use.")
+    return parser.parse_args()
+
+def get_html(url):
+    with urlopen(url) as handle:
+        text = handle.read().decode()
+    return text
+
+def get_title(html):
+    start = html.index("<title>") + len("<title>")
+    end = html.index("</title>")
+    return html[start:end]
+
+def main(args):
+    html = get_html(args.url)
+    title = get_title(html)
+    print(title)
+
+if __name__ == '__main__':
+    main(get_arguments())
