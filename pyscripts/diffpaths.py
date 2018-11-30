@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import argparse
 import os
 import sys
@@ -10,7 +12,7 @@ def valid_path(path):
 
 def get_all_subpaths(path):
     for root, directories, filenames in os.walk(path):
-        root = root.replace(path, '', 1).lstrip('/')
+        root = root.replace(path, '', 1).lstrip(os.sep)
         for directory in directories:
             yield os.path.join(root, directory) + os.sep
         for filename in filenames:
@@ -20,9 +22,9 @@ def get_arguments(args):
     parser = argparse.ArgumentParser('Find the difference in structure'
                                         ' between two paths.')
     parser.add_argument('left', type=valid_path,
-                        help='A path to compare structure')
+                        help='The left path operand to compare')
     parser.add_argument('right', type=valid_path,
-                        help='A path to compare structure')
+                        help='The right path operand to compare')
     return parser.parse_args(args)
 
 def compare_sets(left, right):
@@ -37,11 +39,12 @@ def main(args):
     left_paths = set(get_all_subpaths(args.left))
     right_paths = set(get_all_subpaths(args.right))
     left_only, both, right_only = compare_sets(left_paths, right_paths)
+
     print(json.dumps({
         'only_left' : sorted(left_only),
         'only_right' : sorted(right_only),
         'both' : sorted(both),
-    }))
+    }, indent=2))
 
     return 0
 
