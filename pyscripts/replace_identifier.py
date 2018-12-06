@@ -6,19 +6,19 @@ import sys
 
 def get_arguments(args):
     parser = argparse.ArgumentParser(
-        description="Expand appname identifier into the application name"
+        description='Expand appname identifier into the application name'
     )
 
-    parser.add_argument("-p", "--path", default=os.getcwd(),
-        help="The path to work with. Current working directory by default"
+    parser.add_argument('-p', '--path', default=os.getcwd(),
+        help='The path to work with. Current working directory by default'
     )
 
-    parser.add_argument("-i", "--identifier", required=True,
-        help="The identifier to substitute."
+    parser.add_argument('-i', '--identifier', required=True,
+        help='The identifier to substitute.'
     )
 
-    parser.add_argument("-s", "--substitute", required=True,
-        help="The value to replace the identifier with."
+    parser.add_argument('-s', '--substitute', required=True,
+        help='The value to replace the identifier with.'
     )
 
     parser.add_argument('--dry-run', default=False, action='store_true',
@@ -51,5 +51,5 @@ def main(args):
 
     return 0
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
