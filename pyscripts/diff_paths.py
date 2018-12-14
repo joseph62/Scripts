@@ -41,9 +41,9 @@ def main(args):
     left_only, both, right_only = compare_sets(left_paths, right_paths)
 
     print(json.dumps({
-        'only_left' : sorted(left_only),
-        'only_right' : sorted(right_only),
         'both' : sorted(both),
+        'left' : sorted(left_only),
+        'right' : sorted(right_only),
     }, indent=2))
 
     return 0
