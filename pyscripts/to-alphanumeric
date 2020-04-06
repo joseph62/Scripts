@@ -1,0 +1,49 @@
+#! /usr/bin/env python3
+
+import argparse
+import string
+import sys
+import signal
+
+
+def parse_arguments(args):
+    parser = argparse.ArgumentParser(
+        description="Convert input into alpha numeric character set"
+    )
+    parser.add_argument("-i", "--in-file", help="Input file (default stdin)")
+    parser.add_argument("-o", "--out-file", help="Output file (default stdout)")
+    return parser.parse_args(args)
+
+
+def read_stream_as_bytes(input_stream):
+    c = input_stream.buffer.read(1)
+    while c:
+        yield c
+        c = input_stream.buffer.read(1)
+
+
+def to_character_set(input_stream, output_stream, character_set):
+    bytes_character_set = character_set.encode()
+    for c in read_stream_as_bytes(input_stream):
+        if c in bytes_character_set:
+            output_stream.write(c.decode())
+        else:
+            mapped_character = character_set[ord(c) % len(character_set)]
+            output_stream.write(mapped_character)
+
+
+def main(argv):
+    args = parse_arguments(sys.argv[1:])
+
+    to_character_set(
+        open(args.in_file, "r") if args.in_file else sys.stdin,
+        open(args.out_file, "w") if args.out_file else sys.stdout,
+        string.ascii_letters + string.digits,
+    )
+
+    return 0
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    sys.exit(main(sys.argv))
