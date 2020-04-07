@@ -1,0 +1,64 @@
+#! /usr/bin/env python3
+
+import sys
+import os
+import argparse
+import signal
+
+
+SCRIPT_TEMPLATE="""#! /usr/bin/env python3
+
+import sys
+import argparse
+import signal
+
+
+def parse_arguments(args):
+    parser = argparse.ArgumentParser(
+        description="{description}"
+    )
+    return parser.parse_args(args)
+
+
+def main(args):
+    args = parse_arguments(args)
+    return 0
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    sys.exit(main(sys.argv[1:]))
+"""
+
+
+def parse_arguments(args):
+    parser = argparse.ArgumentParser(
+        description="Create a new python script with a predefined structure"
+    )
+    parser.add_argument("name", help="The name of the new script")
+    parser.add_argument("description", help="A description of the new script's functionality")
+    return parser.parse_args(args)
+
+def make_script(name, description):
+    if os.path.isfile(name):
+        raise FileExistsError(f"File '{name}' already exists")
+    with open(name, 'w') as f:
+        f.write(SCRIPT_TEMPLATE.format(description=description))
+
+
+def main(args):
+    args = parse_arguments(args)
+    try:
+        make_script(
+                args.name,
+                args.description
+        )
+    except Exception as e:
+        print(e, file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    sys.exit(main(sys.argv[1:]))
