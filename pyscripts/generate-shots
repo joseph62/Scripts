@@ -2,6 +2,7 @@
 import random
 import time
 
+
 def main():
 
     random.seed(time.time())
@@ -15,30 +16,30 @@ def main():
 
     for i in range(start, first_order_length):
         shot = random.random()
-        if(shot < make_percent):
-            #make
+        if shot < make_percent:
+            # make
             make_miss.append(make)
         else:
-            #miss
+            # miss
             make_miss.append(miss)
 
     data_array = []
-    
-    for i in range(start,first_order_length,first_order_step):
+
+    for i in range(start, first_order_length, first_order_step):
 
         extra_term = 0.05
-        if(i % 2 == 1):
+        if i % 2 == 1:
             extra_term = -extra_term
 
         makes_per = 0
 
-        for j in range(start,first_order_step):
-            if(make_miss[i+j] == 1):
+        for j in range(start, first_order_step):
+            if make_miss[i + j] == 1:
                 makes_per += 1
 
         shot = random.random()
 
-        if(shot < (makes_per/first_order_step + extra_term)):
+        if shot < (makes_per / first_order_step + extra_term):
             data_array.append(make)
         else:
             data_array.append(miss)
@@ -47,7 +48,8 @@ def main():
 
     for shot in data_array:
         shots += str(shot)
-    
+
     print(shots)
+
 
 main()

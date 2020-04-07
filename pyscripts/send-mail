@@ -4,27 +4,34 @@ from email.mime.text import MIMEText
 import argparse, smtplib
 import sys
 
+
 def get_arguments():
     parser = argparse.ArgumentParser(description="Send a mail message")
-    parser.add_argument("-s","--subject",help="Subject of the email.",required=True)
-    parser.add_argument("-t","--to",help="Email recepient address.",required=True)
-    parser.add_argument("-f","--from",help="Email sender address.",required=True,dest="from_")
+    parser.add_argument("-s", "--subject", help="Subject of the email.", required=True)
+    parser.add_argument("-t", "--to", help="Email recepient address.", required=True)
+    parser.add_argument(
+        "-f", "--from", help="Email sender address.", required=True, dest="from_"
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-b","--body",help="Email body")
-    group.add_argument("--stdin",help="Take body from stdin instead of arguments",action="store_true")
-    parser.add_argument("--server",help="Email server",required=True)
+    group.add_argument("-b", "--body", help="Email body")
+    group.add_argument(
+        "--stdin", help="Take body from stdin instead of arguments", action="store_true"
+    )
+    parser.add_argument("--server", help="Email server", required=True)
     return parser.parse_args()
 
-def send_mail(to,from_,subject,body,server):
+
+def send_mail(to, from_, subject, body, server):
     notification = MIMEText(body)
-    notification['Subject'] = subject
-    notification['From'] = from_
-    notification['To'] = to
+    notification["Subject"] = subject
+    notification["From"] = from_
+    notification["To"] = to
     s = smtplib.SMTP(server)
     s.send_message(notification)
     s.quit()
 
+
 if __name__ == "__main__":
     args = get_arguments()
     body = sys.stdin.read() if args.stdin else args.body
-    send_mail(args.to,args.from_,args.subject,body,args.server)
+    send_mail(args.to, args.from_, args.subject, body, args.server)

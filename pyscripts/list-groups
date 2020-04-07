@@ -2,20 +2,28 @@
 
 from argparse import ArgumentParser
 
+
 def get_arguments():
     parser = ArgumentParser(description="List out the groups on the current machine")
-    parser.add_argument("-f","--file",default="/etc/group",
-                        help="The group file to read (default: /etc/group)")
+    parser.add_argument(
+        "-f",
+        "--file",
+        default="/etc/group",
+        help="The group file to read (default: /etc/group)",
+    )
     return parser.parse_args()
 
+
 def get_groups(file_):
-    with open(file_,'r') as handle:
+    with open(file_, "r") as handle:
         lines = handle.readlines()
     return (line.split(":")[0] for line in lines)
 
+
 def main(args):
     groups = get_groups(args.file)
-    print(*groups,sep="\n")
+    print(*groups, sep="\n")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main(get_arguments())

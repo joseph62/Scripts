@@ -4,54 +4,62 @@ import argparse, os, subprocess
 
 # Command line linters that match up with filetypes
 LINTERS = {
-#        ".js" : ["standard","--fix"],
-#        ".html" : ["vnu"],
-#        ".scss" : ["stylelint", "--fix"],
-#        ".sass" : ["stylelint", "--fix"],
-#        ".css" : ["csslint"],
-        }
+    #        ".js" : ["standard","--fix"],
+    #        ".html" : ["vnu"],
+    #        ".scss" : ["stylelint", "--fix"],
+    #        ".sass" : ["stylelint", "--fix"],
+    #        ".css" : ["csslint"],
+}
+
 
 def get_arguments():
     parser = argparse.ArgumentParser(
-            description="Run all mi449 linters on the given directory"
-            )
-    parser.add_argument('-d', '--dirs', type=str, 
-                        nargs="+", default=[os.getcwd()],
-                        help="The directory to operate on.")
+        description="Run all mi449 linters on the given directory"
+    )
+    parser.add_argument(
+        "-d",
+        "--dirs",
+        type=str,
+        nargs="+",
+        default=[os.getcwd()],
+        help="The directory to operate on.",
+    )
     args = parser.parse_args()
     return args
 
-def get_all_files_with_extension(directory,extension):
+
+def get_all_files_with_extension(directory, extension):
     files = []
     for root, directories, filenames in os.walk(directory):
         for filename in filenames:
             if filename.endswith(extension):
-                files.append(os.path.join(root,filename))
+                files.append(os.path.join(root, filename))
     return files
 
-def run_linters(directory,linters=LINTERS):
-    for extension,linter in linters.items():
-        files = get_all_files_with_extension(directory,extension)
-        for file_ in files:
-            run_linter(file_,linter)
 
-def run_linter(file_,linter):
+def run_linters(directory, linters=LINTERS):
+    for extension, linter in linters.items():
+        files = get_all_files_with_extension(directory, extension)
+        for file_ in files:
+            run_linter(file_, linter)
+
+
+def run_linter(file_, linter):
     args = list(linter)
     args.append(file_)
     print(" ".join(args) + ":")
     completed_process = subprocess.run(
-            args=args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True
-            )
+        args=args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+    )
     print(completed_process.stdout)
     print()
+
 
 if __name__ == "__main__":
     args = get_arguments()
     directories = args.dirs
-    for directory in  directories:
+    for directory in directories:
         run_linters(directory)
-    
-
