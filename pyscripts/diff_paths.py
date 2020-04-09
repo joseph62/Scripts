@@ -6,6 +6,19 @@ import sys
 import json
 
 
+def parse_arguments(args):
+    parser = argparse.ArgumentParser(
+        "Find the difference in structure" " between two paths."
+    )
+    parser.add_argument(
+        "left", type=valid_path, help="The left path operand to compare"
+    )
+    parser.add_argument(
+        "right", type=valid_path, help="The right path operand to compare"
+    )
+    return parser.parse_args(args)
+
+
 def valid_path(path):
     if not os.path.exists(path):
         raise argparse.ArgumentTypeError(f'"{path}" is not a valid path.')
@@ -21,19 +34,6 @@ def get_all_subpaths(path):
             yield os.path.join(root, filename)
 
 
-def get_arguments(args):
-    parser = argparse.ArgumentParser(
-        "Find the difference in structure" " between two paths."
-    )
-    parser.add_argument(
-        "left", type=valid_path, help="The left path operand to compare"
-    )
-    parser.add_argument(
-        "right", type=valid_path, help="The right path operand to compare"
-    )
-    return parser.parse_args(args)
-
-
 def compare_sets(left, right):
     left_only = left - right
     right_only = right - left
@@ -41,11 +41,10 @@ def compare_sets(left, right):
     return left_only, both, right_only
 
 
-def main(args):
-    args = get_arguments(args)
+def diff_paths(left_path, right_path):
 
-    left_paths = set(get_all_subpaths(args.left))
-    right_paths = set(get_all_subpaths(args.right))
+    left_paths = set(get_all_subpaths(left_path))
+    right_paths = set(get_all_subpaths(right_path))
     left_only, both, right_only = compare_sets(left_paths, right_paths)
 
     print(
@@ -59,6 +58,13 @@ def main(args):
         )
     )
 
+
+def main(args):
+    args = parse_arguments(args)
+    try:
+        diff_paths(args.left, args.right)
+    except Exception as e:
+        return 1
     return 0
 
 
