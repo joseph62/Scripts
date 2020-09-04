@@ -6,7 +6,7 @@ import argparse
 import signal
 
 
-SCRIPT_TEMPLATE="""#! /usr/bin/env python3
+SCRIPT_TEMPLATE = """#! /usr/bin/env python3
 
 import sys
 import argparse
@@ -36,23 +36,23 @@ def parse_arguments(args):
         description="Create a new python script with a predefined structure"
     )
     parser.add_argument("name", help="The name of the new script")
-    parser.add_argument("description", help="A description of the new script's functionality")
+    parser.add_argument(
+        "description", help="A description of the new script's functionality"
+    )
     return parser.parse_args(args)
+
 
 def make_script(name, description):
     if os.path.isfile(name):
         raise FileExistsError(f"File '{name}' already exists")
-    with open(name, 'w') as f:
+    with open(name, "w") as f:
         f.write(SCRIPT_TEMPLATE.format(description=description))
 
 
 def main(args):
     args = parse_arguments(args)
     try:
-        make_script(
-                args.name,
-                args.description
-        )
+        make_script(args.name, args.description)
     except Exception as e:
         print(e, file=sys.stderr)
         return 1
