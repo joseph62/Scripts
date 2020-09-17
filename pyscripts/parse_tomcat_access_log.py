@@ -8,7 +8,7 @@ import argparse
 
 UNTIL_SPACE = "([^ ]+)"
 QUOTED = '"([^"]+)"'
-PATTERN = f"{UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} \\[([^\\]]+)\\] {QUOTED} {UNTIL_SPACE} {UNTIL_SPACE} {QUOTED} {QUOTED} (.*)"
+PATTERN = f"([^,]+(?:, [^,]+)*|[^ ]+) {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} \\[([^\\]]+)\\] {QUOTED} {UNTIL_SPACE} {UNTIL_SPACE} {QUOTED} {QUOTED} (.*)"
 KEYS = (
     "x-forwarded-for",
     "remote-hostname",
@@ -42,7 +42,7 @@ def write_as_json(path, traffic):
     print("Writing jsonified traffic")
 
     with open(path, "w") as f:
-        json.dump(successful_traffic, f)
+        json.dump(traffic, f)
 
 
 def write_as_csv(path, traffic, fieldnames=KEYS):
