@@ -4,6 +4,7 @@ import re
 import sys
 import csv
 import json
+import logging
 import argparse
 
 UNTIL_SPACE = "([^ ]+)"
@@ -27,7 +28,7 @@ KEYS = (
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description="Parse default Tomcat access log")
-    parser.add_argument("path", help="The path to the Tomcat access log")
+    parser.add_argument("paths", help="The path to the Tomcat access log", nargs="+")
     format_group = parser.add_mutually_exclusive_group()
     format_group.add_argument(
         "--json", help="Format the output as JSON", action="store_true"
@@ -39,53 +40,62 @@ def parse_args(args):
 
 
 def write_as_json(path, traffic):
-    print("Writing jsonified traffic")
+    logging.info("Writing jsonified traffic")
 
-    with open(path, "w") as f:
+    with open(f"{path}.json", "w") as f:
         json.dump(traffic, f)
 
 
 def write_as_csv(path, traffic, fieldnames=KEYS):
-    print("Writing csv traffic")
+    logging.info("Writing csv traffic")
 
-    with open(path, "w") as f:
+    with open(f"{path}.csv", "w") as f:
         writer = csv.DictWriter(f, fieldnames)
         writer.writeheader()
         writer.writerows(traffic)
 
 
-def main(args):
-    print(f"Reading {args.path}")
-    with open(args.path) as f:
-        raw_traffic_lines = [line for line in f]
-    print(f"Done reading {args.path}")
+def write_failed_traffic(path, failed_traffic):
+    logging.warning(f"Writing {len(failed_traffic)} lines that failed to parse")
 
-    print(f"Parsing {len(raw_traffic_lines)} lines")
+    with open(f"{path}.failed", "w") as f:
+        f.writelines(failed_traffic)
+
+
+def parse_tomcat_log_file(path, succeeded_formatter, failed_formatter):
+    logging.info(f"Reading {path}")
+    with open(path) as f:
+        raw_traffic_lines = [line for line in f]
+    logging.info(f"Done reading {path}")
+
+    logging.info(f"Parsing {len(raw_traffic_lines)} lines")
     traffic_groups = [(line, re.match(PATTERN, line)) for line in raw_traffic_lines]
-    print(f"Done parsing lines")
+    logging.info(f"Done parsing lines")
 
     failed_traffic = [line for line, match in traffic_groups if match is None]
 
     if failed_traffic:
-        print(f"Writing {len(failed_traffic)} lines that failed to parse")
+        failed_formatter(path, failed_traffic)
 
-        with open(f"{args.path}.failed", "w") as f:
-            f.writelines(failed_traffic)
-
-        print(f"Transforming successful matches into json")
-
-    successful_traffic = [
+    succeeded_traffic = [
         dict(zip(KEYS, match.groups()))
         for _, match in traffic_groups
         if match is not None
     ]
 
-    if args.csv:
-        write_as_csv(f"{args.path}.csv", successful_traffic)
-    else:
-        write_as_json(f"{args.path}.json", successful_traffic)
+    succeeded_formatter(path, succeeded_traffic)
 
-    print("DONE!")
+
+def main(args):
+    logging.basicConfig(level=logging.INFO)
+    succeeded_formatter = write_as_csv if args.csv else write_as_json
+
+    for path in args.paths:
+        try:
+            parse_tomcat_log_file(path, succeeded_formatter, write_failed_traffic)
+        except FileNotFoundError as e:
+            logging.error(e)
+
     return 0
 
 
