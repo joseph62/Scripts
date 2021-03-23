@@ -5,8 +5,33 @@ import os
 import argparse
 import signal
 
+CLICK_PARSER = "click"
+ARGPARSE_PARSER = "argparse"
+AUTO_PARSER = "auto"
 
-SCRIPT_TEMPLATE = """#! /usr/bin/env python3
+CLICK_SCRIPT_TEMPLATE = """#! /usr/bin/env python3
+
+import sys
+import click
+import signal
+
+
+@click.command()
+def test_script():
+    \"""
+    A script that uses click
+    \"""
+    pass
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    test_script()
+    sys.exit(0)
+
+"""
+
+STD_SCRIPT_TEMPLATE = """#! /usr/bin/env python3
 
 import sys
 import argparse
@@ -28,6 +53,7 @@ def main(args):
 if __name__ == "__main__":
     signal.signal(signal.SIGPIPE, signal.SIG_DFL)
     sys.exit(main(sys.argv[1:]))
+
 """
 
 
@@ -39,20 +65,61 @@ def parse_arguments(args):
     parser.add_argument(
         "description", help="A description of the new script's functionality"
     )
+    parser.add_argument(
+        "-p",
+        "--parser",
+        help="The commandline argument parser to use",
+        choices={AUTO_PARSER, CLICK_PARSER, ARGPARSE_PARSER},
+        default=AUTO_PARSER,
+    )
     return parser.parse_args(args)
 
 
-def make_script(name, description):
+def create_python_safe_name(name):
+    return name.lower().replace("-", "_").replace(" ", "_")
+
+
+def system_has_click():
+    try:
+        import click
+
+        return True
+    except:
+        return False
+
+
+def get_script(parser):
+    def get_click_script(name, description):
+        return CLICK_SCRIPT_TEMPLATE.format(
+            name=create_python_safe_name(name), description=description
+        )
+
+    def get_std_script(name, description):
+        return STD_SCRIPT_TEMPLATE.format(description=description)
+
+    if parser == CLICK_PARSER:
+        return get_click_script
+    elif parser == ARGPARSE_PARSER:
+        return get_std_script
+    else:
+        if system_has_click():
+            return get_click_script
+        else:
+            return get_std_script
+
+
+def make_script(parser, name, description):
+    script = get_script(parser)(name, description)
     if os.path.isfile(name):
         raise FileExistsError(f"File '{name}' already exists")
     with open(name, "w") as f:
-        f.write(SCRIPT_TEMPLATE.format(description=description))
+        f.write(script)
 
 
 def main(args):
     args = parse_arguments(args)
     try:
-        make_script(args.name, args.description)
+        make_script(args.parser, args.name, args.description)
     except Exception as e:
         print(e, file=sys.stderr)
         return 1
