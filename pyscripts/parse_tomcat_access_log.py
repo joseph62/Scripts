@@ -9,7 +9,7 @@ import argparse
 
 UNTIL_SPACE = "([^ ]+)"
 QUOTED = '"([^"]+)"'
-PATTERN = f"([^,]+(?:, [^,]+)*|[^ ]+) {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} {UNTIL_SPACE} \\[([^\\]]+)\\] {QUOTED} {UNTIL_SPACE} {UNTIL_SPACE} {QUOTED} {QUOTED} (.*)"
+PATTERN = f"([^,]+(?:, [^,]+)*|[^ ]+).*?{UNTIL_SPACE}.*?{UNTIL_SPACE}.*?{UNTIL_SPACE}.*?{UNTIL_SPACE}.*?\\[([^\\]]+)\\].*?{QUOTED}.*?{UNTIL_SPACE}.*?{UNTIL_SPACE}.*?{QUOTED}.*?{QUOTED}(.*)"
 KEYS = (
     "x-forwarded-for",
     "remote-hostname",
